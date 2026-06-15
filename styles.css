@@ -477,6 +477,9 @@ a:hover { text-decoration: underline; }
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 32px;
 }
+.gallery-photos {
+  margin-bottom: 48px;
+}
 .gallery-item {
   background: var(--bg-card);
   border: 1px solid var(--border);
