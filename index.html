@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Agent CLI — Windows 桌面 AI 任务运行器，支持 DeepSeek、OpenAI、Claude、Gemini 等多模型并行协作。">
+  <meta name="description" content="Agent CLI — Windows 桌面 AI 任务运行器，支持 DeepSeek、小米 MiMo 等多模型并行协作。兼容 OpenAI API 协议，可接入自定义模型。">
   <meta name="author" content="luoaijun">
   <meta property="og:title" content="Agent CLI — 桌面 AI 多模型任务运行器">
   <meta property="og:description" content="Windows 桌面 AI 任务运行器，支持多模型并行、本地语音（实验性）、微信小程序授权、定时调度。">
@@ -44,7 +44,7 @@
         </h1>
         <p class="hero-subtitle">
           在 Windows 桌面上同时运行多个 AI 模型，完成任务分解、并行执行、结果汇总。<br>
-          支持 DeepSeek、OpenAI、Claude、Gemini 等主流模型，内置本地语音引擎（实验性，持续优化中）。
+          支持 DeepSeek、小米 MiMo 等主流模型，兼容 OpenAI API 协议接入自定义模型，内置本地语音引擎（实验性，持续优化中）。
         </p>
         <div class="hero-actions">
           <a href="#download" class="btn-primary">
@@ -79,11 +79,11 @@
                 分析完成：发现3处可优化点...
               </div>
               <div class="mockup-msg ai">
-                <div class="mockup-model-tag">Claude</div>
+                <div class="mockup-model-tag">小米 MiMo</div>
                 补充：内存使用可减少40%...
               </div>
               <div class="mockup-msg ai">
-                <div class="mockup-model-tag">Gemini Flash</div>
+                <div class="mockup-model-tag">DeepSeek Flash</div>
                 ✅ 已完成代码审查...
               </div>
             </div>
@@ -149,7 +149,7 @@
         <p class="section-subtitle">兼容 OpenAI API 协议，一键接入</p>
       </div>
       <div class="model-grid">
-        <div class="model-card">
+<div class="model-card">
           <div class="model-icon" style="background:#4F46E5">DS</div>
           <div class="model-info">
             <div class="model-name">DeepSeek</div>
@@ -157,56 +157,21 @@
           </div>
           <div class="model-tag">推荐</div>
         </div>
-        <div class="model-card">
-          <div class="model-icon" style="background:#10A37F">OA</div>
-          <div class="model-info">
-            <div class="model-name">OpenAI</div>
-            <div class="model-desc">GPT-4o · GPT-4.1 · o3</div>
-          </div>
-        </div>
-        <div class="model-card">
-          <div class="model-icon" style="background:#D97706">AN</div>
-          <div class="model-info">
-            <div class="model-name">Anthropic</div>
-            <div class="model-desc">Claude 4 Sonnet · Opus</div>
-          </div>
-        </div>
-        <div class="model-card">
-          <div class="model-icon" style="background:#DC2626">GR</div>
-          <div class="model-info">
-            <div class="model-name">Groq</div>
-            <div class="model-desc">Llama · Mixtral · 高速推理</div>
-          </div>
-        </div>
-        <div class="model-card">
-          <div class="model-icon" style="background:#7C3AED">OL</div>
-          <div class="model-info">
-            <div class="model-name">Ollama</div>
-            <div class="model-desc">本地部署 · 完全免费</div>
-          </div>
-        </div>
-        <div class="model-card">
-          <div class="model-icon" style="background:#2563EB">GM</div>
-          <div class="model-info">
-            <div class="model-name">Google Gemini</div>
-            <div class="model-desc">Gemini 2.0 Flash · Pro · 1M 上下文</div>
-          </div>
-        </div>
-        <div class="model-card">
-          <div class="model-icon" style="background:#0891B2">OR</div>
-          <div class="model-info">
-            <div class="model-name">OpenRouter</div>
-            <div class="model-desc">统一接入 · 200+ 模型</div>
-          </div>
-        </div>
-        <div class="model-card">
-          <div class="model-icon" style="background:#059669">MM</div>
+<div class="model-card">
+          <div class="model-icon" style="background:#10A37F">MI</div>
           <div class="model-info">
             <div class="model-name">小米 MiMo</div>
             <div class="model-desc">mimo-v2.5 · 视觉理解</div>
           </div>
         </div>
-      </div>
+        <div class="model-card">
+          <div class="model-icon" style="background:#7C3AED">+</div>
+          <div class="model-info">
+            <div class="model-name">自定义模型</div>
+            <div class="model-desc">兼容 OpenAI API 协议 · 自由接入</div>
+          </div>
+        </div>
+      </div></div>
     </section>
 
     <!-- How it Works -->
