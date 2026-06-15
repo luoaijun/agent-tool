@@ -466,6 +466,47 @@ a:hover { text-decoration: underline; }
   .step { max-width: 300px; }
 }
 
+/* --- Screenshots Gallery --- */
+.screenshots {
+  padding: 80px 24px;
+}
+.gallery {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 32px;
+}
+.gallery-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+.gallery-item:hover {
+  border-color: var(--border-light);
+}
+.gallery-label {
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+.gallery-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.gallery-video {
+  display: block;
+  width: 100%;
+  max-height: 600px;
+  background: #000;
+}
+
 /* --- Download --- */
 .download {
   max-width: 700px;
