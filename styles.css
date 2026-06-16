@@ -470,6 +470,7 @@ a:hover { text-decoration: underline; }
 .screenshots {
   padding: 80px 24px;
 }
+#screenshotCarousel { margin-bottom: 48px; }
 .carousel {
   position: relative;
   max-width: 900px;

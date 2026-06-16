@@ -130,19 +130,34 @@
         </button>
         <div class="carousel-dots"></div>
       </div>
-      <div class="gallery gallery-videos">
-        <div class="gallery-item">
-          <div class="gallery-label">🎬 录屏 1</div>
-          <video src="resources/录屏_20260615_152447.webm" controls preload="metadata" class="gallery-video">
-            您的浏览器不支持视频播放。
-          </video>
+      <div class="carousel" id="videoCarousel">
+        <div class="carousel-viewport">
+          <div class="carousel-track">
+            <div class="carousel-slide active">
+              <div class="gallery-item">
+                <div class="gallery-label"> 录屏 1</div>
+                <video src="resources/录屏_20260615_152447.webm" controls preload="metadata" class="gallery-video">
+                  您的浏览器不支持视频播放。
+                </video>
+              </div>
+            </div>
+            <div class="carousel-slide">
+              <div class="gallery-item">
+                <div class="gallery-label"> 录屏 2</div>
+                <video src="resources/录屏_20260615_154515.webm" controls preload="metadata" class="gallery-video">
+                  您的浏览器不支持视频播放。
+                </video>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="gallery-item">
-          <div class="gallery-label">🎬 录屏 2</div>
-          <video src="resources/录屏_20260615_154515.webm" controls preload="metadata" class="gallery-video">
-            您的浏览器不支持视频播放。
-          </video>
-        </div>
+        <button class="carousel-btn carousel-prev" aria-label="上一段">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="carousel-btn carousel-next" aria-label="下一段">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="carousel-dots"></div>
       </div>
     </section>
 
@@ -352,10 +367,9 @@
     });
 
     // Screenshot Carousel
-    (() => {
-      const carousel = document.getElementById('screenshotCarousel');
+    function initCarousel(carouselId, labelPrefix) {
+      const carousel = document.getElementById(carouselId);
       if (!carousel) return;
-      const track = carousel.querySelector('.carousel-track');
       const slides = carousel.querySelectorAll('.carousel-slide');
       const prevBtn = carousel.querySelector('.carousel-prev');
       const nextBtn = carousel.querySelector('.carousel-next');
@@ -367,7 +381,7 @@
       slides.forEach((_, i) => {
         const dot = document.createElement('button');
         dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-        dot.setAttribute('aria-label', '\u622a\u56fe ' + (i + 1));
+        dot.setAttribute('aria-label', labelPrefix + (i + 1));
         dot.addEventListener('click', () => goTo(i));
         dotsContainer.appendChild(dot);
       });
@@ -400,7 +414,10 @@
           diff > 0 ? goTo(current + 1) : goTo(current - 1);
         }
       }, { passive: true });
-    })();
+    }
+
+    initCarousel('screenshotCarousel', '截图 ');
+    initCarousel('videoCarousel', '录屏 ');
   </script>
 </body>
 </html>
