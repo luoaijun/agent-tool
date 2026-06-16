@@ -25,6 +25,7 @@
         <a href="#models">模型</a>
         <a href="#how-it-works">原理</a>
         <a href="#screenshots">展示</a>
+        <a href="#ai-generation">AI生成</a>
         <a href="#tutorial">教程</a>
         <a href="#download">下载</a>
         <a href="https://github.com/luoaijun/agent-tool" class="nav-gh" title="GitHub" target="_blank" rel="noopener">
@@ -105,7 +106,7 @@
             <div class="carousel-slide active">
               <div class="gallery-item">
                 <div class="gallery-label"> 📷 截图 1</div>
-                <img src="resources/1.JPG" alt="Agent CLI 截图 1" class="gallery-img" />
+                <img src="resources/1.png" alt="Agent CLI 截图 1" class="gallery-img" />
               </div>
             </div>
             <div class="carousel-slide">
@@ -117,7 +118,7 @@
             <div class="carousel-slide">
               <div class="gallery-item">
                 <div class="gallery-label"> 📷 截图 3</div>
-                <img src="resources/3.png" alt="Agent CLI 截图 3" class="gallery-img" />
+                <img src="resources/3.JPG" alt="Agent CLI 截图 3" class="gallery-img" />
               </div>
             </div>
           </div>
@@ -155,6 +156,60 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <button class="carousel-btn carousel-next" aria-label="下一段">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="carousel-dots"></div>
+      </div>
+    </section>
+
+    <!-- AI Generation -->
+    <section class="screenshots" id="ai-generation">
+      <div class="section-header">
+        <h2 class="section-title">AI 生成</h2>
+        <p class="section-subtitle">图片生成 & 海报生成</p>
+      </div>
+      <div class="carousel" id="imageGenCarousel">
+        <div class="carousel-viewport">
+          <div class="carousel-track">
+            <div class="carousel-slide active">
+              <div class="gallery-item">
+                <div class="gallery-label">  图片生成</div>
+                <img src="resources/cat-ragdoll.jpg" alt="AI 图片生成示例" class="gallery-img" loading="lazy" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-btn carousel-prev" aria-label="上一张">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="carousel-btn carousel-next" aria-label="下一张">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="carousel-dots"></div>
+      </div>
+      <div class="carousel" id="posterGenCarousel">
+        <div class="carousel-viewport">
+          <div class="carousel-track">
+            <div class="carousel-slide active">
+              <div class="gallery-item">
+                <div class="gallery-label">  海报生成 — 图片</div>
+                <img src="resources/poster-ragdoll.jpg" alt="AI 海报生成示例" class="gallery-img" loading="lazy" />
+              </div>
+            </div>
+            <div class="carousel-slide">
+              <div class="gallery-item">
+                <div class="gallery-label">  海报生成 — 录屏</div>
+                <video src="resources/海报生成.webm" controls preload="metadata" class="gallery-video">
+                  您的浏览器不支持视频播放。
+                </video>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-btn carousel-prev" aria-label="上一张">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="carousel-btn carousel-next" aria-label="下一张">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <div class="carousel-dots"></div>
@@ -418,6 +473,8 @@
 
     initCarousel('screenshotCarousel', '截图 ');
     initCarousel('videoCarousel', '录屏 ');
+    initCarousel('imageGenCarousel', '图片生成 ');
+    initCarousel('posterGenCarousel', '海报生成 ');
   </script>
 </body>
 </html>
