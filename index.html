@@ -99,19 +99,36 @@
         <h2 class="section-title">界面展示</h2>
         <p class="section-subtitle">截图 & 录屏</p>
       </div>
-      <div class="gallery gallery-photos">
-        <div class="gallery-item">
-          <div class="gallery-label">📷 截图 1</div>
-          <img src="resources/1.JPG" alt="Agent CLI 截图 1" loading="lazy" class="gallery-img" />
+      <div class="carousel" id="screenshotCarousel">
+        <div class="carousel-viewport">
+          <div class="carousel-track">
+            <div class="carousel-slide active">
+              <div class="gallery-item">
+                <div class="gallery-label"> 📷 截图 1</div>
+                <img src="resources/1.JPG" alt="Agent CLI 截图 1" class="gallery-img" />
+              </div>
+            </div>
+            <div class="carousel-slide">
+              <div class="gallery-item">
+                <div class="gallery-label"> 📷 截图 2</div>
+                <img src="resources/2.JPG" alt="Agent CLI 截图 2" class="gallery-img" />
+              </div>
+            </div>
+            <div class="carousel-slide">
+              <div class="gallery-item">
+                <div class="gallery-label"> 📷 截图 3</div>
+                <img src="resources/3.png" alt="Agent CLI 截图 3" class="gallery-img" />
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="gallery-item">
-          <div class="gallery-label">📷 截图 2</div>
-          <img src="resources/2.JPG" alt="Agent CLI 截图 2" loading="lazy" class="gallery-img" />
-        </div>
-        <div class="gallery-item">
-          <div class="gallery-label"> 截图 3</div>
-          <img src="resources/3.png" alt="Agent CLI 截图 3" loading="lazy" class="gallery-img" />
-        </div>
+        <button class="carousel-btn carousel-prev" aria-label="上一张">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="carousel-btn carousel-next" aria-label="下一张">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="carousel-dots"></div>
       </div>
       <div class="gallery gallery-videos">
         <div class="gallery-item">
@@ -333,6 +350,57 @@
         if (target) target.scrollIntoView({ behavior: 'smooth' });
       });
     });
+
+    // Screenshot Carousel
+    (() => {
+      const carousel = document.getElementById('screenshotCarousel');
+      if (!carousel) return;
+      const track = carousel.querySelector('.carousel-track');
+      const slides = carousel.querySelectorAll('.carousel-slide');
+      const prevBtn = carousel.querySelector('.carousel-prev');
+      const nextBtn = carousel.querySelector('.carousel-next');
+      const dotsContainer = carousel.querySelector('.carousel-dots');
+      let current = 0;
+      const total = slides.length;
+
+      // Build dots
+      slides.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', '\u622a\u56fe ' + (i + 1));
+        dot.addEventListener('click', () => goTo(i));
+        dotsContainer.appendChild(dot);
+      });
+      const dots = dotsContainer.querySelectorAll('.carousel-dot');
+
+      function goTo(index) {
+        slides[current].classList.remove('active');
+        dots[current].classList.remove('active');
+        current = (index + total) % total;
+        slides[current].classList.add('active');
+        dots[current].classList.add('active');
+      }
+
+      prevBtn.addEventListener('click', () => goTo(current - 1));
+      nextBtn.addEventListener('click', () => goTo(current + 1));
+
+      // Keyboard navigation
+      document.addEventListener('keydown', e => {
+        if (!carousel.matches(':hover')) return;
+        if (e.key === 'ArrowLeft') goTo(current - 1);
+        if (e.key === 'ArrowRight') goTo(current + 1);
+      });
+
+      // Touch swipe
+      let touchStartX = 0;
+      carousel.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+      carousel.addEventListener('touchend', e => {
+        const diff = touchStartX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) {
+          diff > 0 ? goTo(current + 1) : goTo(current - 1);
+        }
+      }, { passive: true });
+    })();
   </script>
 </body>
 </html>
