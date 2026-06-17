@@ -189,106 +189,223 @@ a:hover { text-decoration: underline; }
   font-size: 16px;
 }
 
-/* Hero Mockup */
+/* Hero Visual — SVG Animation */
 .hero-visual {
   position: relative;
   z-index: 1;
-  margin-left: 60px;
-  display: none;
-}
-@media (min-width: 1024px) {
-  .hero { gap: 40px; }
-  .hero-visual { display: block; }
-}
-
-.hero-mockup {
-  width: 420px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05) inset;
-}
-.mockup-titlebar {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border);
+  justify-content: center;
+  min-width: 0;
 }
-.mockup-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  background: #444;
+/* Hero flex layout — direct children: hero-content + hero-visual */
+.hero {
+  gap: 60px;
 }
-.mockup-dot:nth-child(1) { background: #ef4444; }
-.mockup-dot:nth-child(2) { background: #f59e0b; }
-.mockup-dot:nth-child(3) { background: #10b981; }
-.mockup-title {
-  margin-left: 8px;
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 500;
+
+@media (max-width: 900px) {
+  .hero {
+    flex-direction: column;
+    gap: 40px;
+    padding-top: 120px;
+  }
+  .hero-content {
+    flex: 0 0 auto;
+    max-width: 100%;
+    text-align: center;
+  }
+  .hero-subtitle { max-width: 100%; }
+  .hero-actions { justify-content: center; }
+  .hero-visual { max-width: 400px; margin: 0 auto; }
 }
-.mockup-body {
-  display: flex;
-  height: 320px;
+.hero-content {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 440px;
+  max-width: 440px;
+  text-align: left;
 }
-.mockup-sidebar {
-  width: 120px;
-  padding: 12px 10px;
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+
+.hero-animation {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
 }
-.mockup-sidebar-item {
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  color: var(--text-muted);
+
+/* === SVG Animation Keyframes === */
+
+/* 流动数据线 — dash 流动 */
+.flow-line {
+  animation: dash-flow 2s linear infinite;
 }
-.mockup-sidebar-item.active {
-  background: var(--accent-glow);
-  color: var(--accent);
+.flow-line-2 { animation-delay: -0.5s; }
+.flow-line-3 { animation-delay: -1s; }
+.flow-line-4 { animation-delay: -1.5s; }
+
+@keyframes dash-flow {
+  0%   { stroke-dashoffset: 16; }
+  100% { stroke-dashoffset: 0; }
 }
-.mockup-chat {
-  flex: 1;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
+
+/* 节点呼吸 */
+.model-node {
+  animation: node-breathe 4s ease-in-out infinite;
 }
-.mockup-msg {
-  padding: 8px 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  line-height: 1.5;
-  max-width: 95%;
+.model-node:nth-child(16) { animation-delay: -1s; }
+.model-node:nth-child(17) { animation-delay: -2s; }
+.model-node:nth-child(18) { animation-delay: -3s; }
+
+@keyframes node-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
 }
-.mockup-msg.user {
-  align-self: flex-end;
-  background: var(--accent);
-  color: #0d0d0d;
+
+/* 节点光晕脉冲 */
+.node-glow {
+  animation: glow-pulse 4s ease-in-out infinite;
 }
-.mockup-msg.ai {
-  align-self: flex-start;
-  background: var(--bg-hover);
-  color: var(--text-secondary);
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
 }
-.mockup-msg.thinking {
-  background: transparent;
-  color: var(--text-muted);
-  font-style: italic;
+
+/* 中心光环旋转 */
+.center-ring {
+  animation: ring-spin 8s linear infinite;
+  transform-origin: 260px 210px;
 }
-.mockup-model-tag {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--accent);
-  margin-bottom: 4px;
+.center-ring-rev {
+  animation: ring-spin-rev 10s linear infinite;
+  transform-origin: 260px 210px;
 }
+
+@keyframes ring-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes ring-spin-rev {
+  0%   { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* 中心光晕脉冲 */
+.center-glow {
+  animation: center-pulse 3s ease-in-out infinite;
+}
+
+@keyframes center-pulse {
+  0%, 100% { opacity: 0.6; r: 48px; }
+  50%      { opacity: 1; r: 52px; }
+}
+
+/* 闪电图标闪烁 */
+.bolt-icon {
+  animation: bolt-flicker 2.5s ease-in-out infinite;
+}
+
+@keyframes bolt-flicker {
+  0%, 90%, 100% { opacity: 1; }
+  93% { opacity: 0.4; }
+  96% { opacity: 0.9; }
+}
+
+/* 脉冲环 */
+.pulse-ring {
+  animation: ring-pulse 3s ease-out infinite;
+}
+.pulse-ring-2 {
+  animation: ring-pulse 3s ease-out 1.5s infinite;
+}
+
+@keyframes ring-pulse {
+  0%   { opacity: 0; r: 40px; }
+  30%  { opacity: 0.5; }
+  100% { opacity: 0; r: 70px; }
+}
+
+/* 流动粒子 — offset-path 在现代浏览器上表现 */
+.particle {
+  offset-path: none;
+  animation: particle-fly 3s ease-in-out infinite;
+}
+.particle-1 { animation-name: particle-fly-1; }
+.particle-2 { animation-name: particle-fly-2; animation-delay: -0.75s; }
+.particle-3 { animation-name: particle-fly-3; animation-delay: -1.5s; }
+.particle-4 { animation-name: particle-fly-4; animation-delay: -2.25s; }
+
+/* 粒子从中心飞向节点 */
+@keyframes particle-fly-1 {
+  0%   { transform: translate(260px, 210px); opacity: 0; }
+  10%  { opacity: 0.8; }
+  80%  { opacity: 0.8; }
+  100% { transform: translate(100px, 90px); opacity: 0; }
+}
+@keyframes particle-fly-2 {
+  0%   { transform: translate(260px, 210px); opacity: 0; }
+  10%  { opacity: 0.8; }
+  80%  { opacity: 0.8; }
+  100% { transform: translate(420px, 90px); opacity: 0; }
+}
+@keyframes particle-fly-3 {
+  0%   { transform: translate(260px, 210px); opacity: 0; }
+  10%  { opacity: 0.8; }
+  80%  { opacity: 0.8; }
+  100% { transform: translate(100px, 340px); opacity: 0; }
+}
+@keyframes particle-fly-4 {
+  0%   { transform: translate(260px, 210px); opacity: 0; }
+  10%  { opacity: 0.8; }
+  80%  { opacity: 0.8; }
+  100% { transform: translate(420px, 340px); opacity: 0; }
+}
+
+/* 返回粒子 — 从节点飞回中心 */
+.particle-return {
+  animation: particle-back 3s ease-in-out infinite;
+}
+.particle-r1 { animation-name: particle-back-1; animation-delay: -1.5s; }
+.particle-r2 { animation-name: particle-back-2; animation-delay: -2.25s; }
+.particle-r3 { animation-name: particle-back-3; animation-delay: -0s; }
+.particle-r4 { animation-name: particle-back-4; animation-delay: -0.75s; }
+
+@keyframes particle-back-1 {
+  0%   { transform: translate(100px, 90px); opacity: 0; }
+  10%  { opacity: 0.8; }
+  80%  { opacity: 0.8; }
+  100% { transform: translate(260px, 210px); opacity: 0; }
+}
+@keyframes particle-back-2 {
+  0%   { transform: translate(420px, 90px); opacity: 0; }
+  10%  { opacity: 0.8; }
+  80%  { opacity: 0.8; }
+  100% { transform: translate(260px, 210px); opacity: 0; }
+}
+@keyframes particle-back-3 {
+  0%   { transform: translate(100px, 340px); opacity: 0; }
+  10%  { opacity: 0.8; }
+  80%  { opacity: 0.8; }
+  100% { transform: translate(260px, 210px); opacity: 0; }
+}
+@keyframes particle-back-4 {
+  0%   { transform: translate(420px, 340px); opacity: 0; }
+  10%  { opacity: 0.8; }
+  80%  { opacity: 0.8; }
+  100% { transform: translate(260px, 210px); opacity: 0; }
+}
+
+/* 连接线渐变脉冲 */
+.conn-line {
+  animation: conn-pulse 6s ease-in-out infinite;
+}
+
+@keyframes conn-pulse {
+  0%, 100% { stroke: #2a2a2a; }
+  50%      { stroke: #3a3a3a; }
+}
+
 
 /* --- Section Common --- */
 .section-header {

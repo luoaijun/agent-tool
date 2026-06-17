@@ -69,39 +69,102 @@
           </a>
         </div>
       </div>
-      <div class="hero-visual">
-        <div class="hero-mockup">
-          <div class="mockup-titlebar">
-            <span class="mockup-dot"></span>
-            <span class="mockup-dot"></span>
-            <span class="mockup-dot"></span>
-            <span class="mockup-title">Agent CLI</span>
-          </div>
-          <div class="mockup-body">
-            <div class="mockup-sidebar">
-              <div class="mockup-sidebar-item active">📁 Project</div>
-              <div class="mockup-sidebar-item">⚙️ 设置</div>
-              <div class="mockup-sidebar-item">📊 用量</div>
-            </div>
-            <div class="mockup-chat">
-              <div class="mockup-msg user">帮我分析这段代码的性能瓶颈</div>
-              <div class="mockup-msg ai thinking">🔍 推理中...</div>
-              <div class="mockup-msg ai">
-                <div class="mockup-model-tag">DeepSeek Pro</div>
-                分析完成：发现3处可优化点...
-              </div>
-              <div class="mockup-msg ai">
-                <div class="mockup-model-tag">小米 MiMo</div>
-                补充：内存使用可减少40%...
-              </div>
-              <div class="mockup-msg ai">
-                <div class="mockup-model-tag">DeepSeek Flash</div>
-                ✅ 已完成代码审查...
-              </div>
-            </div>
-          </div>
+            <div class="hero-visual">
+          <svg class="hero-animation" viewBox="0 0 520 440" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="glow-center" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#63b3ed" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#63b3ed" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="glow-node" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#63b3ed" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#63b3ed" stop-opacity="0"/>
+              </radialGradient>
+              <filter id="glow-filter">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+
+            <!-- 连接线 -->
+            <g class="conn-lines" stroke="#2a2a2a" stroke-width="1.5" fill="none">
+              <path d="M260,210 Q200,140 100,90" class="conn-line"/>
+              <path d="M260,210 Q320,140 420,90" class="conn-line"/>
+              <path d="M260,210 Q200,290 100,340" class="conn-line"/>
+              <path d="M260,210 Q320,290 420,340" class="conn-line"/>
+            </g>
+
+            <!-- 流动数据线 -->
+            <g class="flow-lines" stroke="#63b3ed" stroke-width="1.2" fill="none" opacity="0.5">
+              <path d="M260,210 Q200,140 100,90" class="flow-line" stroke-dasharray="6 10"/>
+              <path d="M260,210 Q320,140 420,90" class="flow-line flow-line-2" stroke-dasharray="6 10"/>
+              <path d="M260,210 Q200,290 100,340" class="flow-line flow-line-3" stroke-dasharray="6 10"/>
+              <path d="M260,210 Q320,290 420,340" class="flow-line flow-line-4" stroke-dasharray="6 10"/>
+            </g>
+
+            <!-- 流动粒子 -->
+            <circle r="4" fill="#63b3ed" class="particle particle-1" filter="url(#glow-filter)"/>
+            <circle r="4" fill="#8b5cf6" class="particle particle-2" filter="url(#glow-filter)"/>
+            <circle r="4" fill="#f59e0b" class="particle particle-3" filter="url(#glow-filter)"/>
+            <circle r="4" fill="#10b981" class="particle particle-4" filter="url(#glow-filter)"/>
+
+            <!-- 返回粒子 -->
+            <circle r="3" fill="#63b3ed" class="particle-return particle-r1" opacity="0"/>
+            <circle r="3" fill="#8b5cf6" class="particle-return particle-r2" opacity="0"/>
+            <circle r="3" fill="#f59e0b" class="particle-return particle-r3" opacity="0"/>
+            <circle r="3" fill="#10b981" class="particle-return particle-r4" opacity="0"/>
+
+            <!-- DeepSeek -->
+            <g class="model-node" transform="translate(100,90)">
+              <circle r="28" fill="url(#glow-node)" class="node-glow"/>
+              <circle r="22" fill="#1a1a1a" stroke="#63b3ed" stroke-width="1.5"/>
+              <text y="5" text-anchor="middle" fill="#63b3ed" font-size="11" font-weight="600">DS</text>
+              <text y="40" text-anchor="middle" fill="#999" font-size="10">DeepSeek</text>
+            </g>
+
+            <!-- MiMo -->
+            <g class="model-node" transform="translate(420,90)">
+              <circle r="28" fill="url(#glow-node)" class="node-glow"/>
+              <circle r="22" fill="#1a1a1a" stroke="#8b5cf6" stroke-width="1.5"/>
+              <text y="5" text-anchor="middle" fill="#8b5cf6" font-size="11" font-weight="600">MM</text>
+              <text y="40" text-anchor="middle" fill="#999" font-size="10">MiMo</text>
+            </g>
+
+            <!-- OpenAI -->
+            <g class="model-node" transform="translate(100,340)">
+              <circle r="28" fill="url(#glow-node)" class="node-glow"/>
+              <circle r="22" fill="#1a1a1a" stroke="#f59e0b" stroke-width="1.5"/>
+              <text y="5" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="600">OA</text>
+              <text y="40" text-anchor="middle" fill="#999" font-size="10">OpenAI</text>
+            </g>
+
+            <!-- Claude -->
+            <g class="model-node" transform="translate(420,340)">
+              <circle r="28" fill="url(#glow-node)" class="node-glow"/>
+              <circle r="22" fill="#1a1a1a" stroke="#10b981" stroke-width="1.5"/>
+              <text y="5" text-anchor="middle" fill="#10b981" font-size="11" font-weight="600">CL</text>
+              <text y="40" text-anchor="middle" fill="#999" font-size="10">Claude</text>
+            </g>
+
+            <!-- 中心节点 -->
+            <g transform="translate(260,210)">
+              <circle r="48" fill="url(#glow-center)" class="center-glow"/>
+              <circle r="38" fill="none" stroke="#63b3ed" stroke-width="0.8" opacity="0.25" class="center-ring"/>
+              <circle r="44" fill="none" stroke="#63b3ed" stroke-width="0.5" opacity="0.15" class="center-ring center-ring-rev"/>
+              <circle r="32" fill="#141414" stroke="#63b3ed" stroke-width="2"/>
+              <polygon points="-5,-12 2,-2 -2,-2 5,12 -2,2 5,2" fill="#63b3ed" class="bolt-icon"/>
+              <text y="55" text-anchor="middle" fill="#e8e8e8" font-size="12" font-weight="700">Agent CLI</text>
+              <text y="70" text-anchor="middle" fill="#666" font-size="10">任务调度中心</text>
+            </g>
+
+            <!-- 脉冲环 -->
+            <g transform="translate(260,210)" opacity="0.3">
+              <circle r="55" fill="none" stroke="#63b3ed" stroke-width="0.8" stroke-dasharray="2 6" class="pulse-ring"/>
+              <circle r="62" fill="none" stroke="#63b3ed" stroke-width="0.6" stroke-dasharray="3 8" class="pulse-ring pulse-ring-2"/>
+            </g>
+          </svg>
         </div>
-      </div>
+
     </section>
     <!-- Screenshots -->
         <section class="screenshots" id="screenshots">
