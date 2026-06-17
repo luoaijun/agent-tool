@@ -1,7 +1,8 @@
 """
-Agent CLI 宣传视频生成器
-使用 Python + PIL + OpenCV + imageio 合成
+Agent CLI 宣传视频生成器 v2
+使用 Python + PIL + OpenCV + ffmpeg pipe 合成
 素材来自 resources 目录
+特性：流式写入 ffmpeg，无需将全部帧加载到内存
 """
 import os
 import sys
@@ -9,7 +10,6 @@ import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 import imageio_ffmpeg
-import imageio.v3 as iio
 import subprocess
 import tempfile
 
@@ -21,12 +21,12 @@ if sys.platform == "win32":
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 RESOURCES_DIR = os.path.join(PROJECT_DIR, "resources")
 OUTPUT_DIR = os.path.join(PROJECT_DIR, "output")
-W, H = 1920, 1080  # 输出分辨率
+W, H = 1920, 1080
 FPS = 30
-BG_COLOR = (26, 26, 46)  # 深色背景 #1a1a2e
-ACCENT_COLOR = (99, 179, 237)  # 蓝色 #63b3ed
+BG_COLOR = (18, 20, 35)
+ACCENT_COLOR = (80, 200, 255)
 WHITE = (255, 255, 255)
-GRAY = (160, 170, 190)
+GRAY = (200, 210, 225)
 
 os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "0"
 
@@ -50,71 +50,68 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # === 工具函数 ===
 
 def create_title_frame(text, subtitle="", accent_text=""):
-    """创建标题页面帧 (PIL -> OpenCV)"""
     img = Image.new("RGB", (W, H), BG_COLOR)
     draw = ImageDraw.Draw(img)
-
-    # Logo 闪电图标
-    draw.text((100, 60), "\u26a1", font=FONT_LARGE, fill=ACCENT_COLOR)
-
-    # Agent CLI
-    draw.text((100, 200), "Agent CLI", font=get_font(120), fill=ACCENT_COLOR)
-
-    # 副标题
-    draw.text((100, 380), text, font=FONT_MED, fill=WHITE)
-
+    # Logo icon
+    bbox = draw.textbbox((0, 0), "[=]", font=FONT_LARGE)
+    draw.text(((W - (bbox[2] - bbox[0])) // 2, 60), "[=]", font=FONT_LARGE, fill=ACCENT_COLOR)
+    # Main title
+    font_title = get_font(120)
+    bbox = draw.textbbox((0, 0), "Agent CLI", font=font_title)
+    draw.text(((W - (bbox[2] - bbox[0])) // 2, 200), "Agent CLI", font=font_title, fill=ACCENT_COLOR)
+    # Text line
+    bbox = draw.textbbox((0, 0), text, font=FONT_MED)
+    draw.text(((W - (bbox[2] - bbox[0])) // 2, 380), text, font=FONT_MED, fill=WHITE)
     if subtitle:
-        draw.text((100, 460), subtitle, font=FONT_SMALL, fill=GRAY)
-
+        bbox = draw.textbbox((0, 0), subtitle, font=FONT_SMALL)
+        draw.text(((W - (bbox[2] - bbox[0])) // 2, 460), subtitle, font=FONT_SMALL, fill=GRAY)
     if accent_text:
-        draw.text((100, 530), accent_text, font=FONT_TINY, fill=ACCENT_COLOR)
-
+        bbox = draw.textbbox((0, 0), accent_text, font=FONT_TINY)
+        draw.text(((W - (bbox[2] - bbox[0])) // 2, 530), accent_text, font=FONT_TINY, fill=ACCENT_COLOR)
     return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
 
 
 def create_text_slide(title, bullets, highlight_idx=-1):
-    """创建文字幻灯片"""
     img = Image.new("RGB", (W, H), BG_COLOR)
     draw = ImageDraw.Draw(img)
-
-    draw.text((100, 80), "\u26a1  " + title, font=FONT_LARGE, fill=ACCENT_COLOR)
-
+    title_text = "> " + title
+    bbox = draw.textbbox((0, 0), title_text, font=FONT_LARGE)
+    draw.text(((W - (bbox[2] - bbox[0])) // 2, 80), title_text, font=FONT_LARGE, fill=ACCENT_COLOR)
     for i, bullet in enumerate(bullets):
         y = 280 + i * 65
         color = ACCENT_COLOR if i == highlight_idx else WHITE
-        draw.text((120, y), "\u2022  " + bullet, font=FONT_MED if i == highlight_idx else FONT_SMALL, fill=color)
-
+        font = FONT_MED if i == highlight_idx else FONT_SMALL
+        bullet_text = "-  " + bullet
+        bbox = draw.textbbox((0, 0), bullet_text, font=font)
+        draw.text(((W - (bbox[2] - bbox[0])) // 2, y), bullet_text, font=font, fill=color)
     return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
 
 
 def create_cta_frame():
-    """片尾 CTA"""
     img = Image.new("RGB", (W, H), BG_COLOR)
     draw = ImageDraw.Draw(img)
-
-    draw.text((100, 200), "\u26a1 Agent CLI", font=get_font(100), fill=ACCENT_COLOR)
-
+    font_cta = get_font(100)
+    bbox = draw.textbbox((0, 0), "[=] Agent CLI", font=font_cta)
+    draw.text(((W - (bbox[2] - bbox[0])) // 2, 200), "[=] Agent CLI", font=font_cta, fill=ACCENT_COLOR)
     lines = [
-        "\u672c\u5730\u4e0b\u8f7d: github.com/luoaijun/agent-tool/releases",
-        "\u5728\u7ebf\u4f53\u9a8c: luoaijun.github.io/agent-tool",
+        "本地下载: github.com/luoaijun/agent-tool/releases",
+        "在线体验: luoaijun.github.io/agent-tool",
         "",
-        "\u652f\u6301 DeepSeek \u00b7 \u5c0f\u7c73 MiMo \u00b7 \u81ea\u5b9a\u4e49\u6a21\u578b",
-        "\u591a\u6a21\u578b\u5e76\u884c \u00b7 \u667a\u80fd\u8def\u7531 \u00b7 \u672c\u5730\u8bed\u97f3",
+        "支持 DeepSeek . 小米 MiMo . 自定义模型",
+        "多模型并行 . 智能路由 . 本地语音",
     ]
     for i, line in enumerate(lines):
-        color = GRAY if line.startswith("\u652f\u6301") or line.startswith("\u591a\u6a21") else WHITE
-        size = FONT_TINY if (line.startswith("\u652f\u6301") or line.startswith("\u591a\u6a21")) else FONT_MED
-        draw.text((100, 400 + i * 55), line, font=size, fill=color)
-
-    # 底部
-    draw.text((100, 900), "\u626b\u63cf\u4e8c\u7ef4\u7801\u4e0b\u8f7d | \u5fae\u4fe1\u5c0f\u7a0b\u5e8f: \u6211\u548c\u732b\u732bcli",
+        color = GRAY if "支持" in line or "多模型" in line else WHITE
+        size = FONT_TINY if ("支持" in line or "多模型" in line) else FONT_MED
+        bbox = draw.textbbox((0, 0), line, font=size)
+        draw.text(((W - (bbox[2] - bbox[0])) // 2, 400 + i * 55), line, font=size, fill=color)
+    bbox = draw.textbbox((0, 0), "扫描二维码下载 | 微信小程序: 我和猫猫cli", font=FONT_TINY)
+    draw.text(((W - (bbox[2] - bbox[0])) // 2, 900), "扫描二维码下载 | 微信小程序: 我和猫猫cli",
               font=FONT_TINY, fill=GRAY)
-
     return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
 
 
 def load_image_frame(path):
-    """加载图片并适配 1920x1080（pillarbox/letterbox）"""
     img = cv2.imread(path)
     if img is None:
         return np.full((H, W, 3), BG_COLOR, dtype=np.uint8)
@@ -123,209 +120,309 @@ def load_image_frame(path):
     nw, nh = int(iw * scale), int(ih * scale)
     resized = cv2.resize(img, (nw, nh), interpolation=cv2.INTER_LANCZOS4)
     canvas = np.full((H, W, 3), BG_COLOR, dtype=np.uint8)
-    x, y = (W - nw) // 2, (H - nh) // 2
+    x = (W - nw) // 2
+    y = (H - nh) // 2
     canvas[y:y+nh, x:x+nw] = resized
     return canvas
 
 
-def add_label(frame, text):
-    """在底部添加标题栏（使用 PIL 以支持中文和 emoji）"""
-    h, w = frame.shape[:2]
-    # 用 PIL 画半透明底栏 + 文字
-    pil_img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    overlay = Image.new("RGBA", (w, 80), (0, 0, 0, 180))
-    pil_img.paste(overlay, (0, h - 80), overlay)
-    draw = ImageDraw.Draw(pil_img)
-    # 清理 emoji 变体选择器，让 PIL 尽量渲染
-    clean_text = text.encode("utf-8", errors="replace").decode("utf-8", errors="replace")
-    draw.text((40, h - 60), clean_text, font=FONT_SMALL, fill=ACCENT_COLOR)
-    return cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-
-
-def load_video_frames(path, max_frames=None, target_fps=FPS):
-    """使用 imageio 读取视频帧"""
-    try:
-        reader = iio.imiter(path, plugin="pyav")
-        fps = iio.immeta(path, plugin="pyav").get("fps", 30)
-    except Exception:
-        try:
-            reader = iio.imiter(path)
-            fps = iio.immeta(path).get("fps", 30)
-        except Exception as e:
-            print(f"  \u26a0\ufe0f \u65e0\u6cd5\u8bfb\u53d6 {os.path.basename(path)}: {e}")
-            return []
-
+def load_video_frames(path, max_frames=300):
+    cap = cv2.VideoCapture(path)
+    if not cap.isOpened():
+        print(f"  [警告] 无法打开视频: {path}")
+        return []
+    total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     frames = []
-    step = max(1, int(fps / target_fps)) if fps > target_fps else 1
-
-    for i, frame in enumerate(reader):
-        if max_frames and len(frames) >= max_frames:
+    count = 0
+    while count < max_frames:
+        ret, frame = cap.read()
+        if not ret:
             break
-        if i % step != 0:
-            continue
-        # 转为 BGR (OpenCV 格式)
-        if frame.shape[-1] == 3:
-            frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        else:
-            frame_bgr = frame
-        # 适配 1920x1080
-        fh, fw = frame_bgr.shape[:2]
-        scale = min(W / fw, H / fh)
-        nw, nh = int(fw * scale), int(fh * scale)
-        resized = cv2.resize(frame_bgr, (nw, nh), interpolation=cv2.INTER_LINEAR)
-        canvas = np.full((H, W, 3), BG_COLOR, dtype=np.uint8)
-        x, y = (W - nw) // 2, (H - nh) // 2
-        canvas[y:y+nh, x:x+nw] = resized
-        frames.append(canvas)
-
-    print(f"  读取 {len(frames)} \u5e27 (原 {i+1}) \u4ece {os.path.basename(path)}")
+        fh, fw = frame.shape[:2]
+        if fw != W or fh != H:
+            scale = min(W / fw, H / fh)
+            nw, nh = int(fw * scale), int(fh * scale)
+            resized = cv2.resize(frame, (nw, nh), interpolation=cv2.INTER_LANCZOS4)
+            canvas = np.full((H, W, 3), BG_COLOR, dtype=np.uint8)
+            x = (W - nw) // 2
+            y = (H - nh) // 2
+            canvas[y:y+nh, x:x+nw] = resized
+            frame = canvas
+        frames.append(frame)
+        count += 1
+    cap.release()
+    if frames:
+        print(f"  读取 {len(frames)} 帧 (原 {total}) 从 {os.path.basename(path)}")
     return frames
 
 
-def dissolve(prev, next_frame, progress):
-    """Crossfade 过渡"""
-    return cv2.addWeighted(prev, 1 - progress, next_frame, progress, 0)
+def add_label(frame, text):
+    result = frame.copy()
+    overlay = result.copy()
+    cv2.rectangle(overlay, (0, 0), (W, 80), (0, 0, 0), -1)
+    result = cv2.addWeighted(overlay, 0.6, result, 0.4, 0)
+    pil_img = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
+    draw = ImageDraw.Draw(pil_img)
+    draw.text((30, 15), text, font=FONT_SMALL, fill=(255, 255, 255))
+    return cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
 
 
-def write_video(frames, out_path, skip_final_transition=False):
-    """写入 MP4 视频"""
-    if not frames:
-        return
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 使用内置 MPEG-4 编码，无需外部库
-    writer = cv2.VideoWriter(out_path, fourcc, FPS, (W, H))
-    for f in frames:
-        writer.write(f)
-    writer.release()
-    print(f"\n\u2705 \u89c6\u9891\u5df2\u4fdd\u5b58: {out_path}")
+# === 流式视频生成器 ===
+
+class VideoStreamer:
+    """流式写入 ffmpeg pipe，不累积全部帧到内存"""
+
+    def __init__(self, out_path, fps=FPS):
+        self.out_path = out_path
+        self.fps = fps
+        self.proc = None
+        self.count = 0
+
+    def open(self):
+        ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+        cmd = [
+            ffmpeg_exe, "-y",
+            "-f", "rawvideo",
+            "-vcodec", "rawvideo",
+            "-s", f"{W}x{H}",
+            "-pix_fmt", "bgr24",
+            "-r", str(self.fps),
+            "-i", "-",
+            "-c:v", "libx264",
+            "-crf", "23",
+            "-preset", "fast",
+            "-pix_fmt", "yuv420p",
+            self.out_path
+        ]
+        stderr_log = os.path.join(tempfile.gettempdir(), "ffmpeg_encode.log")
+        self._stderr_f = open(stderr_log, "w")
+        self._stderr_path = stderr_log
+        self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=self._stderr_f)
+        self.count = 0
+
+    def write_frame(self, frame):
+        self.proc.stdin.write(frame.tobytes())
+        self.count += 1
+
+    def write_frames(self, frame, repeat):
+        """写入同一帧 repeat 次"""
+        data = frame.tobytes()
+        for _ in range(repeat):
+            self.proc.stdin.write(data)
+            self.count += 1
+
+    def close(self):
+        if self.proc:
+            self.proc.stdin.close()
+            self.proc.wait()
+            self._stderr_f.close()
+            if self.proc.returncode != 0:
+                with open(self._stderr_path, "r") as f:
+                    err = f.read()
+                print(f"  [错误] ffmpeg 返回码 {self.proc.returncode}:\n{err[:2000]}")
+            else:
+                print(f"  编码完成 ({self.count} 帧)")
+
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, *args):
+        self.close()
 
 
 # === 主流程 ===
 
 def main():
     print("=" * 60)
-    print("  Agent CLI \u5ba3\u4f20\u89c6\u9891\u751f\u6210\u5668")
+    print("  Agent CLI 宣传视频生成器 v2 (流式)")
     print("=" * 60)
 
-    all_frames = []
+    out_path = os.path.join(OUTPUT_DIR, "agent-cli-promo-v2.mp4")
+    vs = VideoStreamer(out_path)
 
-    # ========== 片头 ==========
-    print("\n\ud83c\udfac \u751f\u6210\u7247\u5934...")
-    opener = create_title_frame(
-        "\u684c\u9762 AI \u591a\u6a21\u578b\u4efb\u52a1\u8fd0\u884c\u5668",
-        "\u652f\u6301 DeepSeek \u00b7 \u5c0f\u7c73 MiMo \u00b7 \u81ea\u5b9a\u4e49\u6a21\u578b",
-        "v0.8.19"
-    )
-    all_frames.extend([opener] * (3 * FPS))  # 3 秒
+    with vs:
+        # ========== 片头 ==========
+        print("\n[1/7] 生成片头...")
+        opener = create_title_frame(
+            "桌面 AI 多模型任务运行器",
+            "支持 DeepSeek . 小米 MiMo . 自定义模型",
+            "v0.8.19"
+        )
+        vs.write_frames(opener, 3 * FPS)  # 3 秒
 
-    # ========== 核心功能亮点（快速轮播） ==========
-    print("\n\ud83c\udfaf \u751f\u6210\u529f\u80fd\u4ecb\u7ecd...")
-    features = [
-        ("\u591a\u6a21\u578b\u5e76\u884c", [
-            "\u540c\u65f6\u8fd0\u884c DeepSeek + MiMo \u7b49\u591a\u4e2a AI \u6a21\u578b",
-            "\u4efb\u52a1\u81ea\u52a8\u5206\u89e3\u3001\u5e76\u884c\u6267\u884c\u3001\u7ed3\u679c\u6c47\u603b",
-            "\u6bcf\u4e2a\u6a21\u578b\u53d1\u6325\u7279\u957f\uff0c\u6548\u7387\u500d\u589e"
-        ]),
-        ("\u667a\u80fd\u8def\u7531", [
-            "\u81ea\u52a8\u8bc6\u522b\u4efb\u52a1\u7c7b\u578b\uff0c\u9009\u62e9\u6700\u4f73\u6a21\u578b",
-            "\u63a8\u7406\u4efb\u52a1 \u2192 Pro \u6a21\u578b | \u89c6\u89c9\u4efb\u52a1 \u2192 \u89c6\u89c9\u6a21\u578b",
-            "\u65e0\u9700\u624b\u52a8\u5207\u6362\uff0cAI \u81ea\u5df1\u77e5\u9053\u8c01\u66f4\u62ff\u624b"
-        ]),
-        ("\u672c\u5730\u8bed\u97f3", [
-            "Windows \u539f\u751f\u8bed\u97f3\u5f15\u64ce\uff0c\u65e0\u9700\u8054\u7f51",
-            "\u8bed\u97f3\u8f93\u5165 \u2192 AI \u5904\u7406 \u2192 \u8bed\u97f3\u64ad\u62a5",
-            "\u6301\u7eed\u4f18\u5316\u4e2d\uff0c\u66f4\u81ea\u7136\u7684\u4ea4\u4e92\u65b9\u5f0f"
-        ]),
-        ("\u5de5\u5177\u8c03\u7528 + \u63d2\u4ef6", [
-            "AI \u53ef\u76f4\u63a5\u8bfb\u5199\u6587\u4ef6\u3001\u6267\u884c\u547d\u4ee4\u3001\u641c\u7d22\u7f51\u7edc",
-            "Skill \u63d2\u4ef6\u6269\u5c55\uff0c\u81ea\u5b9a\u4e49 AI \u80fd\u529b\u8fb9\u754c",
-            "\u5fae\u4fe1\u5c0f\u7a0b\u5e8f\u6388\u6743\uff0c\u4efb\u52a1\u63a8\u9001\u81f3\u624b\u673a\u5ba1\u6279"
-        ]),
-    ]
-    for title, bullets in features:
-        frame = create_text_slide(title, bullets)
-        all_frames.extend([frame] * (3 * FPS))  # 每页 3 秒
+        # ========== 核心功能亮点 (9项，分3组) ==========
+        print("\n[2/7] 生成功能介绍...")
+        features = [
+            # ---- 核心能力 ----
+            ("多模型并行", [
+                "同时运行 DeepSeek + MiMo 等多个 AI 模型",
+                "任务自动分解、并行执行、结果汇总",
+                "每个模型发挥特长，效率倍增"
+            ]),
+            ("智能路由", [
+                "自动识别任务类型，选择最佳模型",
+                "推理任务 -> Pro模型 | 视觉任务 -> 视觉模型",
+                "无需手动切换，AI自己知道谁更拿手"
+            ]),
+            ("工具调用 + Skill插件", [
+                "读写文件、执行命令、搜索网络、操作代码",
+                "Skill插件扩展，自定义AI能力边界",
+                "定时调度任务，AI按时自动执行并通知"
+            ]),
+            # ---- 交互方式 ----
+            ("本地语音 (实验性)", [
+                "Windows原生语音引擎，无需联网即可使用",
+                "语音输入 -> AI处理 -> 语音播报，完整闭环",
+                "5秒停顿自动提交，持续优化中"
+            ]),
+            ("文件拖拽 + 视觉识别", [
+                "拖入图片、PDF、代码文件，AI自动分析",
+                "截图直接粘贴，多模态融合交互",
+                "Markdown实时渲染 + 代码语法高亮"
+            ]),
+            ("项目管理 + 任务队列", [
+                "多项目独立运行，上下文和记忆隔离",
+                "任务排队执行，随时暂停/取消",
+                "项目记忆持久化，重启后自动恢复上下文"
+            ]),
+            # ---- 独特卖点 ----
+            ("微信小程序跨设备联动", [
+                "微信搜索 '我和猫猫cli' 小程序，扫码登录",
+                "手机端发起任务 -> 桌面AI执行 -> 结果推送回手机",
+                "微信授权登录，无需记住复杂密码"
+            ]),
+            ("多模型池 + 自定义API", [
+                "支持 DeepSeek / 小米MiMo / 自定义OpenAI兼容接口",
+                "推理/视觉/快速三种角色，按需分配模型",
+                "自带免费 DeepSeek Flash，开箱即用"
+            ]),
+            ("AI图片/海报生成", [
+                "输入描述 -> AI自动生成图片、海报",
+                "布偶猫、风景、设计稿... 随心所欲",
+                "本视频即由Agent CLI自主编辑生成"
+            ]),
+        ]
+        for title, bullets in features:
+            frame = create_text_slide(title, bullets)
+            vs.write_frames(frame, 3 * FPS)
 
-    # ========== 截图展示（带标签和过渡） ==========
-    print("\n\ud83d\udcf7 \u751f\u6210\u622a\u56fe\u5c55\u793a...")
-    screenshots = [
-        ("1.png", "Agent CLI \u4e3b\u754c\u9762 - \u591a\u6a21\u578b\u5bf9\u8bdd"),
-        ("2.JPG", "\u6587\u4ef6\u62d6\u62fd + Markdown \u5b9e\u65f6\u6e32\u67d3"),
-        ("3.JPG", "\u9879\u76ee\u7ba1\u7406 + \u4efb\u52a1\u961f\u5217"),
-    ]
-    for fname, label in screenshots:
-        fpath = os.path.join(RESOURCES_DIR, fname)
+        # ========== 截图展示 ==========
+        print("\n[3/7] 生成截图展示...")
+        screenshots = [
+            ("1.png", "Agent CLI 主界面 - 多模型对话"),
+            ("2.JPG", "文件拖拽 + Markdown 实时渲染"),
+            ("3.JPG", "项目管理 + 任务队列"),
+        ]
+        for fname, label in screenshots:
+            fpath = os.path.join(RESOURCES_DIR, fname)
+            if os.path.exists(fpath):
+                frame = load_image_frame(fpath)
+                frame = add_label(frame, label)
+                vs.write_frames(frame, 4 * FPS)
+                print(f"  [OK] {fname}")
+            else:
+                print(f"  [!!] {fname} 不存在")
+
+        # ========== 录屏展示 ==========
+        print("\n[4/7] 生成录屏展示...")
+        recordings = [
+            ("录屏_20260615_152447.webm", "实操录屏 1 - Agent CLI 工作流"),
+            ("录屏_20260615_154515.webm", "实操录屏 2 - Agent CLI 工作流"),
+        ]
+        for fname, label in recordings:
+            fpath = os.path.join(RESOURCES_DIR, fname)
+            if os.path.exists(fpath):
+                frames = load_video_frames(fpath, max_frames=15 * FPS)
+                if frames:
+                    frames[0] = add_label(frames[0], label)
+                    for f in frames:
+                        vs.write_frame(f)
+            else:
+                print(f"  [!!] {fname} 不存在")
+
+        # ========== 快速上手教程 ==========
+        print("\n[5/7] 生成上手教程...")
+        tutorial = [
+            ("第1步: 配置 API Key", [
+                "打开设置 -> 选择模型提供商 -> 填入 API Key",
+                "支持 DeepSeek / 小米MiMo / 自定义接口",
+                "自带免费 DeepSeek Flash，开箱即用"
+            ]),
+            ("第2步: 新建项目", [
+                "点击左上角项目选择器 -> 新建项目",
+                "每个项目独立上下文 + 持久化记忆",
+                "多项目同时运行，任务互不干扰"
+            ]),
+            ("第3步: 发起任务", [
+                "输入任务描述 -> AI自动路由最佳模型",
+                "拖入图片/文件，AI自动分析内容",
+                "点击麦克风按钮，开启语音对话"
+            ]),
+            ("第4步: 跨设备联动", [
+                "微信搜小程序 '我和猫猫cli' -> 扫码登录",
+                "手机发任务 -> 桌面执行 -> 结果推送回手机",
+                "外出也能让AI干活，回来直接看结果"
+            ]),
+        ]
+        for title, bullets in tutorial:
+            frame = create_text_slide(title, bullets)
+            vs.write_frames(frame, 3 * FPS)
+
+        # ========== AI 生成展示 ==========
+        print("\n[6/7] 生成 AI 生成展示...")
+
+        frame = create_text_slide("AI 图片生成", [
+            "输入描述 -> AI 自动生成图片",
+            "布偶猫、风景、设计稿... 随心所欲"
+        ])
+        vs.write_frames(frame, 3 * FPS)
+
+        # AI 图片生成结果
+        fpath = os.path.join(RESOURCES_DIR, "cat-ragdoll.jpg")
         if os.path.exists(fpath):
             frame = load_image_frame(fpath)
-            frame = add_label(frame, label)
-            all_frames.extend([frame] * (4 * FPS))  # 每张 4 秒
-            print(f"  \u2705 {fname}")
-        else:
-            print(f"  \u26a0\ufe0f {fname} \u4e0d\u5b58\u5728")
+            frame = add_label(frame, "[=] AI图片生成 - 布偶猫")
+            vs.write_frames(frame, 5 * FPS)
+            print(f"  [OK] cat-ragdoll.jpg")
 
-    # ========== 录屏展示 ==========
-    print("\n\ud83c\udfa5 \u751f\u6210\u5f55\u5c4f\u5c55\u793a...")
-    recordings = [
-        ("\u5f55\u5c4f_20260615_152447.webm", "\u5b9e\u9645\u64cd\u4f5c\u5f55\u5c4f 1"),
-        ("\u5f55\u5c4f_20260615_154515.webm", "\u5b9e\u9645\u64cd\u4f5c\u5f55\u5c4f 2"),
-    ]
-    for fname, label in recordings:
-        fpath = os.path.join(RESOURCES_DIR, fname)
+        # AI 海报生成结果
+        fpath = os.path.join(RESOURCES_DIR, "poster-ragdoll.jpg")
         if os.path.exists(fpath):
-            frames = load_video_frames(fpath, max_frames=10 * FPS)
-            # 给第一帧加标签
+            frame = load_image_frame(fpath)
+            frame = add_label(frame, "[=] AI海报生成 - 布偶猫")
+            vs.write_frames(frame, 5 * FPS)
+            print(f"  [OK] poster-ragdoll.jpg")
+
+        # 海报生成录屏
+        fpath = os.path.join(RESOURCES_DIR, "海报生成.webm")
+        if os.path.exists(fpath):
+            frames = load_video_frames(fpath, max_frames=15 * FPS)
             if frames:
-                frames[0] = add_label(frames[0], label)
-            all_frames.extend(frames)
+                frames[0] = add_label(frames[0], "[=] AI海报生成过程 - 实操录屏")
+                for f in frames:
+                    vs.write_frame(f)
         else:
-            print(f"  \u26a0\ufe0f {fname} \u4e0d\u5b58\u5728")
+            print(f"  [!!] 海报生成.webm 不存在")
 
-    # ========== AI 生成展示 ==========
-    print("\n\ud83e\udd16 \u751f\u6210 AI \u751f\u6210\u5c55\u793a...")
+        # 自生成标注
+        note = create_text_slide("关于本视频", [
+            "本视频由 Agent CLI 自主编辑生成",
+            "综合 Python + PIL + OpenCV + ffmpeg 工具链",
+            "所有素材来自本地 resources 文件夹"
+        ])
+        vs.write_frames(note, 2 * FPS)
 
-    frame = create_text_slide("AI \u56fe\u7247\u751f\u6210", [
-        "\u8f93\u5165\u63cf\u8ff0 \u2192 AI \u81ea\u52a8\u751f\u6210\u56fe\u7247",
-        "\u5e03\u5076\u732b\u3001\u98ce\u666f\u3001\u8bbe\u8ba1\u7a3f... \u968f\u5fc3\u6240\u6b32"
-    ])
-    all_frames.extend([frame] * (3 * FPS))
+        # ========== 片尾 CTA ==========
+        print("\n[7/7] 生成片尾...")
+        cta = create_cta_frame()
+        vs.write_frames(cta, 6 * FPS)
 
-    # AI 图片生成结果
-    fpath = os.path.join(RESOURCES_DIR, "cat-ragdoll.jpg")
-    if os.path.exists(fpath):
-        frame = load_image_frame(fpath)
-        frame = add_label(frame, "\ud83d\udc31 AI \u56fe\u7247\u751f\u6210\u793a\u4f8b - \u5e03\u5076\u732b")
-        all_frames.extend([frame] * (5 * FPS))
-        print(f"  \u2705 cat-ragdoll.jpg")
-
-    # AI 海报生成结果
-    fpath = os.path.join(RESOURCES_DIR, "poster-ragdoll.jpg")
-    if os.path.exists(fpath):
-        frame = load_image_frame(fpath)
-        frame = add_label(frame, "\ud83c\udfa8 AI \u6d77\u62a5\u751f\u6210\u793a\u4f8b")
-        all_frames.extend([frame] * (5 * FPS))
-        print(f"  \u2705 poster-ragdoll.jpg")
-
-    # 海报生成录屏
-    fpath = os.path.join(RESOURCES_DIR, "\u6d77\u62a5\u751f\u6210.webm")
-    if os.path.exists(fpath):
-        frames = load_video_frames(fpath, max_frames=8 * FPS)
-        if frames:
-            frames[0] = add_label(frames[0], "\ud83c\udfa8 AI \u6d77\u62a5\u751f\u6210\u8fc7\u7a0b\u5f55\u5c4f")
-        all_frames.extend(frames)
-    else:
-        print(f"  \u26a0\ufe0f \u6d77\u62a5\u751f\u6210.webm \u4e0d\u5b58\u5728")
-
-    # ========== 片尾 CTA ==========
-    print("\n\ud83c\udf1f \u751f\u6210\u7247\u5c3e...")
-    cta = create_cta_frame()
-    all_frames.extend([cta] * (5 * FPS))
-
-    # ========== 写入视频 ==========
-    print(f"\n\ud83d\udcca \u603b\u5e27\u6570: {len(all_frames)} | \u65f6\u957f: {len(all_frames)/FPS:.1f}\u79d2")
-    out_path = os.path.join(OUTPUT_DIR, "agent-cli-promo.mp4")
-    write_video(all_frames, out_path)
-
-    print(f"\n\ud83c\udf89 \u5b8c\u6210! \u89c6\u9891\u4f4d\u4e8e: {out_path}")
-    print(f"   \u6587\u4ef6\u5927\u5c0f: {os.path.getsize(out_path) / 1024 / 1024:.1f} MB")
+    # 完成
+    print(f"\n{'='*60}")
+    print(f"  总帧数: {vs.count} | 时长: {vs.count/FPS:.1f}秒")
+    print(f"\n  完成! 视频位于: {out_path}")
+    print(f"  文件大小: {os.path.getsize(out_path) / 1024 / 1024:.1f} MB")
 
 
 if __name__ == "__main__":
