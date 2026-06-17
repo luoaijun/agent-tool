@@ -6,7 +6,7 @@
   <meta name="description" content="Agent CLI — Windows 桌面 AI 任务运行器，支持 DeepSeek、小米 MiMo 等多模型并行协作。兼容 OpenAI API 协议，可接入自定义模型。">
   <meta name="author" content="luoaijun">
   <meta property="og:title" content="Agent CLI — 桌面 AI 多模型任务运行器">
-  <meta property="og:description" content="Windows 桌面 AI 任务运行器，支持多模型并行、本地语音（实验性）、微信小程序授权、定时调度。">
+  <meta property="og:description" content="Windows 桌面 AI 任务运行器，支持多模型并行、本地语音（实验性）、本地图片生成（SD 离线模型）、微信小程序授权、定时调度。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://luoaijun.github.io/agent-tool/">
   <title>Agent CLI — 桌面 AI 多模型任务运行器</title>
@@ -34,7 +34,7 @@
         <a href="#models">模型</a>
         <a href="#how-it-works">原理</a>
         <a href="#screenshots">展示</a>
-        <a href="#ai-generation">AI生成</a>
+        <a href="#ai-generation">AI辅助</a>
         <a href="#tutorial">教程</a>
         <a href="#download">下载</a>
         <a href="https://github.com/luoaijun/agent-tool" class="nav-gh" title="GitHub" target="_blank" rel="noopener">
@@ -180,16 +180,17 @@
     <!-- AI Generation -->
     <section class="screenshots" id="ai-generation">
       <div class="section-header">
-        <h2 class="section-title">AI 生成</h2>
-        <p class="section-subtitle">图片生成 & 海报生成</p>
+        <h2 class="section-title">AI 辅助创作</h2>
+        <p class="section-subtitle">Agent CLI 本身不具备图片生成能力，以下案例通过 AI 辅助完成（网络检索 + 外部工具编排）</p>
       </div>
       <div class="carousel" id="imageGenCarousel">
         <div class="carousel-viewport">
           <div class="carousel-track">
             <div class="carousel-slide active">
               <div class="gallery-item">
-                <div class="gallery-label">  图片生成</div>
-                <img src="resources/cat-ragdoll.jpg" alt="AI 图片生成示例" class="gallery-img" loading="lazy" />
+                <div class="gallery-label">  图片生成 — SD 1.5 本地模型</div>
+                <img src="resources/cat-ragdoll.jpg" alt="Agent CLI 本地离线模型生成的布偶猫图片" class="gallery-img" loading="lazy" />
+                <div class="gallery-note">⚠️ 此图由 Agent CLI 下载 Stable Diffusion 1.5 离线模型本地生成</div>
               </div>
             </div>
           </div>
@@ -207,8 +208,9 @@
           <div class="carousel-track">
             <div class="carousel-slide active">
               <div class="gallery-item">
-                <div class="gallery-label">  海报生成 — 图片</div>
-                <img src="resources/poster-ragdoll.jpg" alt="AI 海报生成示例" class="gallery-img" loading="lazy" />
+                <div class="gallery-label">  海报创作 — 结果</div>
+                <img src="resources/poster-ragdoll.jpg" alt="Agent CLI 海报创作示例" class="gallery-img" loading="lazy" />
+                <div class="gallery-note">由 Agent CLI 编排外部工具生成</div>
               </div>
             </div>
             <div class="carousel-slide">
